@@ -7,6 +7,7 @@ let startApp = () => {
   app.speed = 2;
   app.removeStars = false;
   app.walls = [];
+  app.score = 0;
 
   // Initialize the game
   setGame();
@@ -20,12 +21,16 @@ let startApp = () => {
   window.requestAnimationFrame(frameUpdate);
 }
 
+
+// Set Game Function
 let setGame = () => {
   spawnPlayer();
   app.stars = [];
   spawnInitialStars();
 }
 
+
+// Classes
 class Player {
   constructor(position, size, color) {
     this.position = position,
@@ -35,7 +40,7 @@ class Player {
   move() {
     if (this.moveUp) {
       if (this.position.y > 31) {
-        this.position.y -= 5
+        this.position.y -= 5;
       }
       else {
         this.position.y = 31;
@@ -89,16 +94,32 @@ class Wall {
     this.color = color,
     this.direction = direction
   }
+  move() {
+    if (this.direction === 'up') {
+      this.position.y -= app.speed;
+      if (this.position.y <= -300) {
+        let idx = app.walls.indexOf(this);
+        app.walls.splice(idx, 1);
+      }
+    }
+    else if (this.direction === 'left') {
+      this.position.x -= app.speed;
+      if (this.position.x <= -384) {
+        let idx = app.walls.indexOf(this);
+        app.walls.splice(idx, 1);
+      }
+    }
+  }
   drawMe(context) {
     drawObject(context, this);
   }
 }
 
-let spawnPlayer = () => {
-  app.player = new Player({x: 55, y: app.canvas.height / 2}, {height: 60, width: 30}, "#9A40F4");
+const spawnPlayer = () => {
+  app.player = new Player({x: 55, y: app.canvas.height / 2}, {height: 60, width: 30}, "#6FC3DF");
 }
 
-function spawnInitialStars() {
+const spawnInitialStars = () => {
   let i = 0;
   while (i < 12) {
     addStar({x: Math.random(true) * app.canvas.width, y: Math.random() * app.canvas.height}, {height: 4, width: 4}, "#FF0000");
@@ -106,7 +127,8 @@ function spawnInitialStars() {
   }
 }
 
-function frameUpdate(timeStamp) {
+const frameUpdate =(timeStamp) => {
+  app.score++;
   window.requestAnimationFrame(frameUpdate);
   app.lastTime = timeStamp;
   app.player.move();
@@ -115,39 +137,34 @@ function frameUpdate(timeStamp) {
     star.position.x -= app.speed;
   })
   app.walls.forEach(function (wall) {
+    wall.move();
     if (wall.direction === 'up') {
-      wall.position.y -= app.speed;
-      if (wall.position.y <= -300) {
-        let idx = app.walls.indexOf(wall);
-        app.walls.splice(idx, 1);
-      }
       if (wall.position.x - 109 <= app.player.position.x && wall.position.x + 109 >= app.player.position.x) {
         if (wall.position.y - 325 <= app.player.position.y && wall.position.y + 325 >= app.player.position.y) {
+          console.log(app.score);
           alert('Game Over!');
           resetGame();
         }
       }
       if (wall.position.y - 325 <= app.player.position.y && wall.position.y + 325 >= app.player.position.y) {
         if (wall.position.x - 109 <= app.player.position.x && wall.position.x + 109 >= app.player.position.x) {
+          console.log(app.score);
           alert('Game Over!');
           resetGame();
         }
       }
     }
     else if (wall.direction === 'left') {
-      wall.position.x -= app.speed;
-      if (wall.position.x <= -384) {
-        let idx = app.walls.indexOf(wall);
-        app.walls.splice(idx, 1);
-      }
       if (wall.position.x - 394 <= app.player.position.x && wall.position.x + 394 >= app.player.position.x) {
         if (wall.position.y - 98 <= app.player.position.y && wall.position.y + 98 >= app.player.position.y) {
+          console.log(app.score);
           alert('Game Over!');
           resetGame();
         }
       }
       if (wall.position.y - 98 <= app.player.position.y && wall.position.y + 98 >= app.player.position.y) {
         if (wall.position.x - 394 <= app.player.position.x && wall.position.x + 394 >= app.player.position.x) {
+          console.log(app.score);
           alert('Game Over!');
           resetGame();
         }
@@ -165,23 +182,23 @@ function frameUpdate(timeStamp) {
   }
 }
 
-let addStarChance = () => {
+const addStarChance = () => {
   let chance = Math.random();
   if (chance >= 0.8) {
     addStar(false);
   }
 }
 
-let addWallChance = () => {
+const addWallChance = () => {
   let chance = Math.random();
   if (chance >= 0.98 && app.walls.length <= 3) {
     addWall();
   }
 }
 
-function addStar(init) {
+const addStar = (init) => {
   if (init === false) {
-    let newStar = new Star({x: 763, y: Math.random() * app.canvas.height}, {height: 4, width: 4}, "#FFFFFF");
+    let newStar = new Star({x: 763, y: Math.random() * app.canvas.height}, {height: 4, width: 4}, "#E4FFFF");
     app.stars.push(newStar);
   }
   else {
@@ -190,7 +207,7 @@ function addStar(init) {
   }
 }
 
-function addWall() {
+const addWall = () => {
   let direction = Math.random();
   let xPosition = Math.random() * app.canvas.width;
   let yPosition = Math.random() * app.canvas.height;
@@ -204,17 +221,17 @@ function addWall() {
     if (yPosition <= 40) {
       yPosition += 40;
     }
-    app.walls.push(new Wall({x: 1144.5, y: yPosition}, {height: 150, width: 768}, '#FFFFFF', direction));
+    app.walls.push(new Wall({x: 1144.5, y: yPosition}, {height: 150, width: 768}, '#FE3527', direction));
   }
   else if (direction === 'up') {
     if (xPosition <= 40) {
       xPosition += 40;
     }
-    app.walls.push(new Wall({x: xPosition, y: 900}, {height: 600, width: 192}, '#FFFFFF', direction));
+    app.walls.push(new Wall({x: xPosition, y: 900}, {height: 600, width: 192}, '#FE3527', direction));
   }
 }
 
-let drawScene = () => {
+const drawScene = () => {
   app.context.fillStyle = '#000020';
   app.context.fillRect(0, 0, app.canvas.width, app.canvas.height);
   app.player.drawMe(app.context);
@@ -228,7 +245,7 @@ let drawScene = () => {
 
 
 // Key Down/Up
-let myKeyDown = (e) => {
+const myKeyDown = (e) => {
   switch(e.keyCode) {
     case 38:
       upKeyDownHandler();
@@ -245,7 +262,7 @@ let myKeyDown = (e) => {
   }
 }
 
-function myKeyUp(e) {
+const myKeyUp = (e) => {
   switch(e.keyCode) {
     case 38:
       upKeyUpHandler();
@@ -296,7 +313,10 @@ const leftKeyUpHandler = () => {
   app.player.moveLeft = false;
 }
 
+
+// Reset Game Function
 const resetGame = () => {
+  app.score = 0;
   app.player.position.x = 55;
   app.player.position.y = 300;
   app.stars = [];

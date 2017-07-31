@@ -1,13 +1,17 @@
 <html>
   <head>
     <title>DODJ</title>
-    <style>
-      #canvas {
-        background-color: black;
-      }
-    </style>
   </head>
+  <style>
+    #canvas {
+      border: 5px solid #6FC3DF;
+    }
+    #title {
+      margin-left: 355px;
+    }
+  </style>
   <body onload="startApp()">
+    <h1 id="title">DODJ</h1>
     <canvas id="canvas" width="768" height="600"></canvas>
     <script type="text/javascript" src="dodj.js"></script>
     <script type="text/javascript" src="helper.js"></script>
