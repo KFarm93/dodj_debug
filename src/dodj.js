@@ -1,15 +1,15 @@
 let app = {};
 
 let startApp = () => {
-  // Initialize the canvas
+  // Initialize the canvas & state
   app.canvas = document.getElementById('canvas');
   app.context = canvas.getContext('2d');
   app.speed = 2;
   app.removeStars = false;
   app.walls = [];
   app.score = 0;
-
-  // Initialize the game
+  app.gameOver = false;
+  app.dialogue = '';
   setGame();
 
   // Listen for keyboard events
@@ -32,10 +32,16 @@ let setGame = () => {
 
 // Classes
 class Player {
-  constructor(position, size, color) {
-    this.position = position,
-    this.size = size,
-    this.color = color
+  constructor(position, size) {
+    this.position = {
+      x: 55,
+      y: app.canvas.height / 2
+    },
+    this.size = {
+      height: 60,
+      width: 30
+    },
+    this.color = "#2694FE";
   }
   move() {
     if (this.moveUp) {
@@ -116,69 +122,73 @@ class Wall {
 }
 
 const spawnPlayer = () => {
-  app.player = new Player({x: 55, y: app.canvas.height / 2}, {height: 60, width: 30}, "#6FC3DF");
+  app.player = new Player();
 }
 
 const spawnInitialStars = () => {
   let i = 0;
-  while (i < 12) {
+  while (i < 20) {
     addStar({x: Math.random(true) * app.canvas.width, y: Math.random() * app.canvas.height}, {height: 4, width: 4}, "#FF0000");
     i++;
   }
 }
 
-const frameUpdate =(timeStamp) => {
-  app.score++;
-  window.requestAnimationFrame(frameUpdate);
-  app.lastTime = timeStamp;
-  app.player.move();
-  drawScene();
-  app.stars.forEach(function (star) {
-    star.position.x -= app.speed;
-  })
-  app.walls.forEach(function (wall) {
-    wall.move();
-    if (wall.direction === 'up') {
-      if (wall.position.x - 109 <= app.player.position.x && wall.position.x + 109 >= app.player.position.x) {
-        if (wall.position.y - 325 <= app.player.position.y && wall.position.y + 325 >= app.player.position.y) {
-          console.log(app.score);
-          alert('Game Over!');
-          resetGame();
-        }
-      }
-      if (wall.position.y - 325 <= app.player.position.y && wall.position.y + 325 >= app.player.position.y) {
-        if (wall.position.x - 109 <= app.player.position.x && wall.position.x + 109 >= app.player.position.x) {
-          console.log(app.score);
-          alert('Game Over!');
-          resetGame();
-        }
-      }
-    }
-    else if (wall.direction === 'left') {
-      if (wall.position.x - 394 <= app.player.position.x && wall.position.x + 394 >= app.player.position.x) {
-        if (wall.position.y - 98 <= app.player.position.y && wall.position.y + 98 >= app.player.position.y) {
-          console.log(app.score);
-          alert('Game Over!');
-          resetGame();
-        }
-      }
-      if (wall.position.y - 98 <= app.player.position.y && wall.position.y + 98 >= app.player.position.y) {
-        if (wall.position.x - 394 <= app.player.position.x && wall.position.x + 394 >= app.player.position.x) {
-          console.log(app.score);
-          alert('Game Over!');
-          resetGame();
-        }
-      }
-    }
-  })
-  addStarChance();
-  addWallChance();
-  if (app.stars.length >= 200) {
-    app.removeStars = true;
+const frameUpdate = (timeStamp) => {
+  $('#score').text('SCORE: ' + app.score);
+  $('#dialogue').text(app.dialogue);
+  if (app.gameOver === true) {
+    app.player.moveLeft = false;
+    app.player.moveRight = false;
+    app.player.moveUp = false;
+    app.player.moveDown = false;
+    app.dialogue = 'GAME OVER! (SPACEBAR TO PLAY AGAIN)';
+    window.requestAnimationFrame(frameUpdate);
   }
-  if (app.removeStars === true) {
-    app.stars = app.stars.slice(app.stars.length / 2, app.stars.length);
-    app.removeStars = false;
+  else {
+    app.score++;
+    window.requestAnimationFrame(frameUpdate);
+    app.lastTime = timeStamp;
+    app.player.move();
+    drawScene();
+    app.stars.forEach(function (star) {
+      star.position.x -= app.speed;
+    })
+    app.walls.forEach(function (wall) {
+      wall.move();
+      if (wall.direction === 'up') {
+        if (wall.position.x - 109 <= app.player.position.x && wall.position.x + 109 >= app.player.position.x) {
+          if (wall.position.y - 330 <= app.player.position.y && wall.position.y + 330 >= app.player.position.y) {
+            app.gameOver = true;
+          }
+        }
+        if (wall.position.y - 330 <= app.player.position.y && wall.position.y + 330 >= app.player.position.y) {
+          if (wall.position.x - 109 <= app.player.position.x && wall.position.x + 109 >= app.player.position.x) {
+            app.gameOver = true;
+          }
+        }
+      }
+      else if (wall.direction === 'left') {
+        if (wall.position.x - 394 <= app.player.position.x && wall.position.x + 394 >= app.player.position.x) {
+          if (wall.position.y - 98 <= app.player.position.y && wall.position.y + 98 >= app.player.position.y) {
+            app.gameOver = true;
+          }
+        }
+        if (wall.position.y - 98 <= app.player.position.y && wall.position.y + 98 >= app.player.position.y) {
+          if (wall.position.x - 394 <= app.player.position.x && wall.position.x + 394 >= app.player.position.x) {
+            app.gameOver = true;
+          }
+        }
+      }
+    })
+    addStarChance();
+    addWallChance();
+    if (app.stars.length >= 200) {
+      app.removeStars = true;
+    }
+    if (app.removeStars === true) {
+      app.stars = app.stars.slice(app.stars.length / 2, app.stars.length);
+      app.removeStars = false;
+    }
   }
 }
 
@@ -246,36 +256,49 @@ const drawScene = () => {
 
 // Key Down/Up
 const myKeyDown = (e) => {
-  switch(e.keyCode) {
-    case 38:
-      upKeyDownHandler();
-      break;
-    case 40:
-      downKeyDownHandler();
-      break;
-    case 39:
-      rightKeyDownHandler();
-      break;
-    case 37:
-      leftKeyDownHandler();
-      break;
+  if (app.gameOver === true) {
+    switch(e.keyCode) {
+      case 32:
+        resetGame();
+    }
+  }
+  else {
+    switch(e.keyCode) {
+      case 38:
+        upKeyDownHandler();
+        break;
+      case 40:
+        downKeyDownHandler();
+        break;
+      case 39:
+        rightKeyDownHandler();
+        break;
+      case 37:
+        leftKeyDownHandler();
+        break;
+    }
   }
 }
 
 const myKeyUp = (e) => {
-  switch(e.keyCode) {
-    case 38:
-      upKeyUpHandler();
-      break;
-    case 40:
-      downKeyUpHandler();
-      break;
-    case 39:
-      rightKeyUpHandler();
-      break;
-    case 37:
-      leftKeyUpHandler();
-      break;
+  if (app.gameOver === true) {
+    // do nothing
+  }
+  else {
+    switch(e.keyCode) {
+      case 38:
+        upKeyUpHandler();
+        break;
+      case 40:
+        downKeyUpHandler();
+        break;
+      case 39:
+        rightKeyUpHandler();
+        break;
+      case 37:
+        leftKeyUpHandler();
+        break;
+    }
   }
 }
 
@@ -316,6 +339,8 @@ const leftKeyUpHandler = () => {
 
 // Reset Game Function
 const resetGame = () => {
+  app.gameOver = false;
+  app.dialogue = '';
   app.score = 0;
   app.player.position.x = 55;
   app.player.position.y = 300;

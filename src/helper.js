@@ -1,4 +1,4 @@
-function drawObject(context, obj) {
+const drawObject = (context, obj) => {
   context.save();
   context.translate(obj.position.x, obj.position.y);
   context.fillStyle = obj.color;
